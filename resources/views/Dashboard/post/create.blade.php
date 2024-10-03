@@ -1,6 +1,7 @@
 @extends('dashboard.master')
 
 @section('content')
+    <a href="{{route('post.index')}}">Back</a>
     <form action="{{route('post.store')}}" method="POST">
         @include('dashboard.fragment.errors')
         @csrf
