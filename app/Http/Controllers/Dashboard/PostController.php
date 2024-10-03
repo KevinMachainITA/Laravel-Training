@@ -7,6 +7,7 @@ use App\Models\Post;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use App\Http\Requests\Post\StoreRequest;
+use App\Http\Requests\Post\UpdateRequest;
 
 class PostController extends Controller
 {
@@ -62,15 +63,25 @@ class PostController extends Controller
      */
     public function edit(Post $post)
     {
-        //
+        $categories = Category::get();
+        return view('dashboard.post.edit', compact('categories','post'));  
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Post $post)
+    public function update(UpdateRequest $request, Post $post)
     {
-        //
+        $validatedData = $request->validated();
+
+        if(isset($validatedData['image'])){
+            $validatedData['image'] = $filename = time().'.'.$validatedData['image']->extension();
+            $request->image->move(public_path('uploads\posts'),$filename);
+        }
+
+        $post->update($validatedData);
+
+        return redirect()->route('post.index')->with('success', 'Post updated successfully!');
     }
 
     /**
@@ -78,6 +89,11 @@ class PostController extends Controller
      */
     public function destroy(Post $post)
     {
-        //
+        try {
+            $post->delete();
+            return redirect()->route('post.index')->with('success', 'Post deleted successfully!');
+        } catch (Error $e) {
+            return redirect()->route('post.index')->with('failed', 'Post not deleted successfully!');
+        }
     }
 }
