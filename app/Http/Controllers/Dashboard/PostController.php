@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Post;
 use App\Models\Category;
 use Illuminate\Http\Request;
+use App\Http\Requests\Post\StoreRequest;
 
 class PostController extends Controller
 {
@@ -14,7 +15,8 @@ class PostController extends Controller
      */
     public function index()
     {
-        return "Index post";
+        $posts = Post::get();
+        return view('Dashboard.post.index', compact('posts'));
     }
 
     /**
@@ -22,15 +24,29 @@ class PostController extends Controller
      */
     public function create()
     {
-        //
+        $categories = Category::get();
+        return view('Dashboard.post.create', compact('categories'));
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreRequest $request)
     {
-        //
+        // Validate the incoming request data
+        $validatedData = $request->validated();
+
+        Post::create([
+            'title' => $validatedData['title'],
+            'slug' => $validatedData['slug'],
+            'description' => $validatedData['description'],
+            'content' => $validatedData['content'],
+            'category_id' => $validatedData['category_id'],
+            'posted' => $validatedData['posted'],
+        ]);
+
+        // Redirect to index
+        return redirect()->route('post.index')->with('success', 'Post created successfully!');
     }
 
     /**
