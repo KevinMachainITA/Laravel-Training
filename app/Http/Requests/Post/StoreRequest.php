@@ -3,6 +3,8 @@
 namespace App\Http\Requests\Post;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StoreRequest extends FormRequest
 {
@@ -27,7 +29,16 @@ class StoreRequest extends FormRequest
             'description' => 'nullable|string',
             'content' => 'nullable',
             'category_id' => 'required|exists:categories,id', // Ensure category exists
-            'posted' => 'required|in:yes,not', // Only accept these values
+            'posted' => 'in:yes,not', // Only accept these values
         ];
+    }
+
+    protected function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json([
+            'success' => false,
+            'message' => 'Validation errors',
+            'errors' => $validator->errors()
+        ], 422));
     }
 }
